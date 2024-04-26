@@ -1,9 +1,11 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://mthie:9P4ns3n#16@164.92.192.79/schnabulino_user'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 app.secret_key = os.urandom(24)
 
 
@@ -53,8 +55,20 @@ def logout():
     return redirect(url_for('login'))
 
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    einrichtung = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(80), unique=False, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
+    def __repr__(self):
+        return '<User %r>' % self.username
 
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
 
 
 
